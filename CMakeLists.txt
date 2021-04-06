@@ -42,7 +42,17 @@ target_include_directories(interface
   ${CMAKE_CURRENT_LIST_DIR}/include  
   )
 
-install(TARGETS interface DESTINATION bin)
+#build lib udp
+add_library(udp "")
+
+target_sources(udp PUBLIC 
+  ${CMAKE_CURRENT_LIST_DIR}/lib/udp_server.c   
+  ${CMAKE_CURRENT_LIST_DIR}/lib/udp_client.c   
+  )
+
+target_include_directories(udp PUBLIC 
+  ${CMAKE_CURRENT_LIST_DIR}/lib
+  )
 
 #build launch_processes
 add_executable(launch_processes "")
