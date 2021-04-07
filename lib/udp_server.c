@@ -7,17 +7,15 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
-bool UDP_Server_Init(UDP_Server *server, char *buffer, size_t buffer_size)
+bool UDP_Server_Init(UDP_Server *server)
 {
     bool status = false;
     struct sockaddr_in server_addr;
 
     do
     {
-        memset(server, 0, sizeof(UDP_Server));
-
-        server->buffer = buffer;
-        server->buffer_size = buffer_size;
+        if(!server || !server->buffer || !server->buffer_size)
+            break;
 
         server->socket = socket(AF_INET, SOCK_DGRAM, 0);
         if(server->socket < 0)
@@ -48,14 +46,15 @@ bool UDP_Server_Run(UDP_Server *server, void *user_data)
     bool status = false;
     struct sockaddr_in client_addr;
     socklen_t len = sizeof(client_addr);
-    
+    size_t read_size;
 
     if(server->socket > 0)
     {
-        recvfrom(server->socket, server->buffer, server->buffer_size, MSG_WAITALL,
+        read_size = recvfrom(server->socket, server->buffer, server->buffer_size, MSG_WAITALL,
                                     (struct sockaddr *)&client_addr, &len); 
-
-        server->on_receive_message(server->buffer, server->buffer_size, user_data);     
+        server->buffer[read_size] = 0;
+        server->on_receive_message(server->buffer, read_size, user_data);
+        memset(server->buffer, 0, server->buffer_size);
         status = true;
     }
 

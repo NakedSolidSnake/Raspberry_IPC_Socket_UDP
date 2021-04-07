@@ -30,7 +30,6 @@ endif()
 
 #build lib interface
 add_library(interface "")
-
 target_sources(interface
   PUBLIC 
   ${CMAKE_CURRENT_LIST_DIR}/src/led_interface.c
@@ -40,6 +39,7 @@ target_sources(interface
 target_include_directories(interface 
   PUBLIC 
   ${CMAKE_CURRENT_LIST_DIR}/include  
+  ${CMAKE_CURRENT_LIST_DIR}/lib
   )
 
 #build lib udp
@@ -74,7 +74,7 @@ install(TARGETS launch_processes DESTINATION bin)
 # build led_process
 add_executable(led_process "")
 
-target_link_libraries(led_process PUBLIC ${LIBS})
+target_link_libraries(led_process PUBLIC ${LIBS} udp)
 
 target_sources(led_process
   PUBLIC 
@@ -92,7 +92,7 @@ install(TARGETS led_process DESTINATION bin)
 # build button_process
 add_executable(button_process "")
 
-target_link_libraries(button_process PUBLIC ${LIBS})
+target_link_libraries(button_process PUBLIC ${LIBS} udp)
 
 target_sources(button_process
   PUBLIC 

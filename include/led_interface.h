@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <udp_server.h>
 
 /**
  * @brief 
@@ -14,6 +15,12 @@ typedef struct
     bool (*Set)(void *object, uint8_t state);
 } LED_Interface;
 
+typedef struct 
+{
+    void *object;
+    LED_Interface *interface;
+} LED_Data;
+
 /**
  * @brief 
  * 
@@ -23,6 +30,6 @@ typedef struct
  * @return true 
  * @return false 
  */
-bool LED_Run(void *object, LED_Interface *led);
+bool LED_Run(UDP_Server *server, LED_Data *led);
 
 #endif /* LED_INTERFACE_H_ */
