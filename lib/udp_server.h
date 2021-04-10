@@ -4,8 +4,16 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
+/**
+ * @brief 
+ * 
+ */
 typedef void (*Event)(const char *buffer, size_t buffer_size, void *data);
 
+/**
+ * @brief 
+ * 
+ */
 typedef struct 
 {
     int socket;
@@ -16,7 +24,23 @@ typedef struct
 } UDP_Server;
 
 
+/**
+ * @brief 
+ * 
+ * @param server 
+ * @return true 
+ * @return false 
+ */
 bool UDP_Server_Init(UDP_Server *server);
+
+/**
+ * @brief 
+ * 
+ * @param server 
+ * @param user_data 
+ * @return true 
+ * @return false 
+ */
 bool UDP_Server_Run(UDP_Server *server, void *user_data);
 
 

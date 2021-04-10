@@ -9,8 +9,46 @@
 
 #define _1ms    1000
 
-bool Button_Run(void *object, Button_Interface *button)
+typedef enum 
 {
-   
+    LED_ON, 
+    LED_OFF
+} LED_Commands;
+
+const char *led_commands[] = 
+{
+    "LED ON",
+    "LED OFF"
+};
+
+bool Button_Run(UDP_Client *client, Button_Data *button)
+{
+    int state = 0;
+
+    if(button->interface->Init(button->object) == false)
+        return false;
+
+    if(UDP_Client_Init(client) == false)
+        return false;
+
+    while (true)
+    {
+        while (1)
+        {
+            if (!button->interface->Read(button->object))
+            {
+                usleep(_1ms * 100);
+                state ^= 0x01;
+                break;
+            }
+            else
+            {
+                usleep(_1ms);
+            }
+        }
+
+        UDP_Client_Send(client, led_commands[state], strlen(led_commands[state]));
+    }
+
     return false;
 }

@@ -22,7 +22,19 @@ int main(int argc, char *argv[])
         .Read = Read
     };
 
-    Button_Run(NULL, &button_interface);
+    Button_Data button = 
+    {
+        .object = NULL,
+        .interface = &button_interface
+    };
+
+    UDP_Client client = 
+    {
+        .hostname = "127.0.0.1",
+        .port  = "1234"
+    };
+
+    Button_Run(&client, &button);
         
     return 0;
 }

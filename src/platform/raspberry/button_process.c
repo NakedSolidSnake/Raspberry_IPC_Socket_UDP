@@ -13,7 +13,7 @@ static bool Read(void *object);
 int main(int argc, char *argv[])
 {
 
-    Button_t button = 
+    Button_t btn_7 = 
     {
         .gpio.pin = 7,
         .gpio.eMode = eModeInput,
@@ -28,7 +28,19 @@ int main(int argc, char *argv[])
         .Read = Read
     };
 
-    Button_Run(&button, &button_interface);
+    Button_Data button = 
+    {
+        .object = &btn_7,
+        .interface = &button_interface
+    };
+
+    UDP_Client client = 
+    {
+        .hostname = "127.0.0.1",
+        .port  = "1234"
+    };
+
+    Button_Run(&client, &button);
         
     return 0;
 }

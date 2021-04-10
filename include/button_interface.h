@@ -2,6 +2,7 @@
 #define BUTTON_INTERFACE_H_
 
 #include <stdbool.h>
+#include <udp_client.h>
 
 /**
  * @brief 
@@ -14,6 +15,12 @@ typedef struct
     
 } Button_Interface;
 
+typedef struct 
+{
+    void *object;
+    Button_Interface *interface;
+} Button_Data;
+
 /**
  * @brief 
  * 
@@ -23,6 +30,6 @@ typedef struct
  * @return true 
  * @return false 
  */
-bool Button_Run(void *object, Button_Interface *button);
+bool Button_Run(UDP_Client *client, Button_Data *button);
 
 #endif /* BUTTON_INTERFACE_H_ */
