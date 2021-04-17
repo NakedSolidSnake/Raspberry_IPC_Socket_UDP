@@ -86,8 +86,8 @@ Para faciliar a execução do exemplo, o exemplo proposto foi criado baseado em 
 Pra obter uma cópia do projeto execute os comandos a seguir:
 
 ```bash
-$ git clone [projeto]
-$ cd [projeto]
+$ git clone https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_UDP
+$ cd Raspberry_IPC_Socket_UDP
 $ mkdir build && cd build
 ```
 
@@ -164,7 +164,7 @@ $ ./kill_process.sh
 Preencher
 
 ## Referência
-* [Link do projeto completo](https://github.com/NakedSolidSnake/Raspberry_IPC_MMAP)
+* [Link do projeto completo](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_UDP)
 * [Mark Mitchell, Jeffrey Oldham, and Alex Samuel - Advanced Linux Programming](https://www.amazon.com.br/Advanced-Linux-Programming-CodeSourcery-LLC/dp/0735710430)
 * [fork, exec e daemon](https://github.com/NakedSolidSnake/Raspberry_fork_exec_daemon)
 * [biblioteca hardware](https://github.com/NakedSolidSnake/Raspberry_lib_hardware)
