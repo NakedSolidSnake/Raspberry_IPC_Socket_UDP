@@ -2,7 +2,7 @@
   <img src="https://cdn0.sbnation.com/assets/3417793/moveoverlynnswann.gif"/>
 </p>
 
-# _Signal_
+# UDP 
 
 ## Tópicos
 * [Introdução](#introdução)
@@ -25,7 +25,21 @@
 * [Referência](#referência)
 
 ## Introdução
-Preencher
+UDP significa _User Datagram Protocol_, é um protocolo que não precisa se conectar na máquina para qual qer se enviar a mensagem, ou seja, não há a necessidade do _handshake_ presente no [TCP](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_TCP) necessário para a sua conexão, diante disso essa caracterista o torna muito mais rápido sendo utilizados em aplicações que involvem jogos online, streaming de video e video conferência. Diferente do TCP, o UDP não garante entrega de dados, a máquina que recebe a mensagem não informa que a mensagem foi recebida, dessa forma trazendo consigo a idéia de ser um protocolo não confiável, o que acaba se tornando verdade quando as máquinas precisam usar a internet para se comunicarem(grandes distâncias) podendo entregar os pacotes fora de ordem, mas quando dentro de uma rede local acaba sendo uma opção melhor de utilização.
+
+## Datagrama UDP
+O Protocolo UDP é um protocolo simples, devido a sua simplicidade garante uma melhor performance no processamento do protocolo. O UDP opera sobre o protocolo IP a imagem a seguir demonstra como o protocolo UDP é encapsulado no protocolo IPv4
+
+<p align="center">
+  <img src="docs/ip_udp.png"/>
+</p>
+
+O Protocolo UDP possui 4 campos de cabeçalho(_header_) e o campo onde os dados são transmitidos chamado de _payload_
+<p align="center">
+  <img src="docs/udp.png"/>
+</p>
+
+No Header possui um campo de 2 bytes para a porta de origem, um campo de 2 bytes para a porta de destino, mais um campo de 2 bytes para indicar o tamanho do _payload_ a ser enviado e por fim um campo de 2 bytes de checksum. O tamanho máximo de bytes que o UDP pode transmitir é de 64kB(65535 bytes).
 
 ## Implementação
 
