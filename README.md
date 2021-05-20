@@ -6,10 +6,22 @@
 
 ## Tópicos
 * [Introdução](#introdução)
+* [Datagrama UDP](#datagrama-udp)
+* [Systemcalls utilizados no UDP](#systemcalls-utilizados-no-udp)
+* [Preparação do Ambiente](#preparação-do-ambiente)
+* [netcat](#netcat)
+* [tcpdump](#tcpdump)
 * [Implementação](#implementação)
+* [Biblioteca](#biblioteca)
+* [udp_server.h](#udp_serverh)
+* [udp_server.c]($udp_serverc)
+* [udp_client.h](#udp_clienth)
+* [udp_client.c](#udp_clientc)
 * [launch_processes](#launch_processes)
 * [button_interface](#button_interface)
 * [led_interface](#led_interface)
+* [button_process](#button_process)
+* [led_process](#led_process)
 * [Compilando, Executando e Matando os processos](#compilando-executando-e-matando-os-processos)
 * [Compilando](#compilando)
 * [Clonando o projeto](#clonando-o-projeto)
@@ -20,12 +32,14 @@
 * [Interagindo com o exemplo](#interagindo-com-o-exemplo)
 * [MODO PC](#modo-pc-1)
 * [MODO RASPBERRY](#modo-raspberry-1)
+* [Monitorando o tráfego usando o tcpdump](#monitorando-o-tráfego-usando-o-tcpdump)
+* [Testando conexão com o servidor via netcat](#testando-conexão-com-o-servidor-via-netcat)
 * [Matando os processos](#matando-os-processos)
 * [Conclusão](#conclusão)
 * [Referência](#referência)
 
 ## Introdução
-UDP significa _User Datagram Protocol_, é um protocolo que não precisa se conectar na máquina para qual qer se enviar a mensagem, ou seja, não há a necessidade do _handshake_ presente no [TCP](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_TCP) necessário para a sua conexão, diante disso essa caracterista o torna muito mais rápido sendo utilizados em aplicações que involvem jogos online, streaming de video e video conferência. Diferente do TCP, o UDP não garante entrega de dados, a máquina que recebe a mensagem não informa que a mensagem foi recebida, dessa forma trazendo consigo a idéia de ser um protocolo não confiável, o que acaba se tornando verdade quando as máquinas precisam usar a internet para se comunicarem(grandes distâncias) podendo entregar os pacotes fora de ordem, mas quando dentro de uma rede local acaba sendo uma opção melhor de utilização.
+UDP significa _User Datagram Protocol_, é um protocolo que não precisa se conectar na máquina para qual se quer enviar a mensagem, ou seja, não há a necessidade do _handshake_ presente no [TCP](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_TCP) necessário para a sua conexão, diante disso essa caracterista o torna muito mais rápido sendo utilizados em aplicações que involvem jogos online, streaming de video e video conferência. Diferente do TCP, o UDP não garante entrega de dados, a máquina que recebe a mensagem não informa que a mensagem foi recebida, dessa forma trazendo consigo a idéia de ser um protocolo não confiável, o que acaba se tornando verdade quando as máquinas precisam usar a internet para se comunicarem(grandes distâncias) podendo entregar os pacotes fora de ordem, mas quando dentro de uma rede local acaba sendo uma opção melhor de utilização.
 
 ## Datagrama UDP
 O Protocolo UDP é um protocolo simples, devido a sua simplicidade garante uma melhor performance no processamento do protocolo. O UDP opera sobre o protocolo IP a imagem a seguir demonstra como o protocolo UDP é encapsulado no protocolo IPv4
