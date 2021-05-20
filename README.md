@@ -39,10 +39,10 @@
 * [Referência](#referência)
 
 ## Introdução
-UDP significa _User Datagram Protocol_, é um protocolo que não precisa se conectar na máquina para qual se quer enviar a mensagem, ou seja, não há a necessidade do _handshake_ presente no [TCP](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_TCP) necessário para a sua conexão, diante disso essa caracterista o torna muito mais rápido sendo utilizados em aplicações que involvem jogos online, streaming de video e video conferência. Diferente do TCP, o UDP não garante entrega de dados, a máquina que recebe a mensagem não informa que a mensagem foi recebida, dessa forma trazendo consigo a idéia de ser um protocolo não confiável, o que acaba se tornando verdade quando as máquinas precisam usar a internet para se comunicarem(grandes distâncias) podendo entregar os pacotes fora de ordem, mas quando dentro de uma rede local acaba sendo uma opção melhor de utilização.
+UDP significa _User Datagram Protocol_, é um protocolo que não precisa se conectar na máquina para qual se quer enviar a mensagem, ou seja, não há a necessidade do _handshake_ presente no [TCP](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_TCP) necessário para a sua conexão, diante disso essa caracteristica o torna muito mais rápido, sendo utilizados em aplicações que involvem jogos online, streaming de video e video conferência. Diferente do TCP, o UDP não garante entrega de dados, a máquina que recebe a mensagem não informa que a mensagem foi recebida, dessa forma trazendo consigo a idéia de ser um protocolo não confiável, o que acaba se tornando verdade quando as máquinas precisam usar a internet para se comunicarem(grandes distâncias) podendo entregar os pacotes fora de ordem, mas quando dentro de uma rede local acaba sendo uma opção melhor de utilização.
 
 ## Datagrama UDP
-O Protocolo UDP é um protocolo simples, devido a sua simplicidade garante uma melhor performance no processamento do protocolo. O UDP opera sobre o protocolo IP a imagem a seguir demonstra como o protocolo UDP é encapsulado no protocolo IPv4
+O Protocolo UDP é um protocolo simples, devido a sua simplicidade garante uma melhor performance no processamento do protocolo. O UDP opera sobre o protocolo IP. A imagem a seguir demonstra como o protocolo UDP é encapsulado no protocolo IPv4
 
 <p align="center">
   <img src="docs/ip_udp.png"/>
@@ -56,7 +56,7 @@ O Protocolo UDP possui 4 campos de cabeçalho(_header_) e o campo onde os dados 
 No Header possui um campo de 2 bytes para a porta de origem, um campo de 2 bytes para a porta de destino, mais um campo de 2 bytes para indicar o tamanho do _payload_ a ser enviado e por fim um campo de 2 bytes de checksum. O tamanho máximo de bytes que o UDP pode transmitir é de 64kB(65535 bytes).
 
 ## Systemcalls utilizados no UDP
-Para criar uma aplicação utilizando TCP utilizamos com conjunto bem específico de funções, sendo elas descritas a seguir:
+Para criar uma aplicação utilizando UDP utilizamos com conjunto bem específico de funções, sendo elas descritas a seguir:
 
 Cria um endpoint para estabelecer uma comunicação
 ```c
@@ -252,7 +252,7 @@ do
 return status;
 ```
 
-Na função UDP_Client_Send definimos algumas váriaveis para auxiliar na comunicação com o servidor, sendo uma variável booleana que representa o estado de envio para o servidor, uma estrutura sockaddr_in que é usada para configurar o servidor no qual será enviado as mensagens e uma variável de quantidade de dados enviados.
+Na função UDP_Client_Send definimos algumas variáveis para auxiliar na comunicação com o servidor, sendo uma variável booleana que representa o estado de envio para o servidor, uma estrutura sockaddr_in que é usada para configurar o servidor no qual será enviado as mensagens e uma variável de quantidade de dados enviados.
 
 ```c
 bool status = false;
