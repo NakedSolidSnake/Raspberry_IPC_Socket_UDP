@@ -103,10 +103,12 @@ Para demonstrar o uso desse IPC, iremos utilizar o modelo Cliente/Servidor, onde
 A biblioteca criada permite uma fácil criação do servidor, sendo o servidor orientado a eventos, ou seja, fica aguardando as mensagens chegarem.
 
 ### udp_server.h
-
+Primeiramente criamos um callback responsável por eventos de recebimento, essa função será chamada quando houve esse evento.
 ```c
 typedef void (*Event)(const char *buffer, size_t buffer_size, void *data);
 ```
+
+Criamos também um contexto que armazena os parâmetros utilizados pelo servidor, sendo o socket para armazenar a instância criada, port que recebe o número que corresponde onde o serviço será disponibilizado, buffer que aponta para a memória alocada previamente pelo usuário, buffer_size o representa o tamanho do buffer e o callback para para recepção da mensagem
 
 ```c
 typedef struct 
@@ -119,72 +121,83 @@ typedef struct
 } UDP_Server;
 ```
 
+Essa função inicializa o servidor com os parâmetros do contexto
 ```c
 bool UDP_Server_Init(UDP_Server *server);
 ```
-
+Essa função aguarda uma mensagem enviada pelo cliente.
 ```c
 bool UDP_Server_Run(UDP_Server *server, void *user_data);
 ```
 
 ### udp_server.c
 
-bool UDP_Server_Init(UDP_Server *server)
+No UDP_Server_Init definimos algumas váriaveis para auxiliar na inicialização do servidor, sendo uma variável booleana que representa o estado da inicialização do servidor, uma variável do tipo inteiro para habilitar o reuso da porta caso o servidor precise reiniciar e uma estrutura sockaddr_in que é usada para configurar o servidor para se comunicar através da rede.
+
+```c
+bool status = false;
+struct sockaddr_in server_addr;
+int yes = 1;
+```
+
+Para realizar a inicialização é criado um dummy do while, para que quando houver falha em qualquer uma das etapas, irá sair da função com status de erro, nesse ponto verificamos se o contexto, o buffer e se o tamanho do buffer foi inicializado, sendo sua inicialização de reponsabilidade do usuário
+
+```c
+if(!server || !server->buffer || !server->buffer_size)
+    break;
+```
+Criamos um endpoint com o perfil de se conectar via protocolo IPv4(AF_INET), do tipo datagram que caracteriza o UDP(SOCK_DGRAM), o último parâmetro pode ser 0 nesse caso.
+```c
+server->socket = socket(AF_INET, SOCK_DGRAM, 0);
+if(server->socket < 0)
+    break;
+```
+Preenchemos a estrutura com parâmetros fornecidos pelo usuário como em qual porta que o serviço vai rodar.
+```c
+memset(&server_addr, 0, sizeof(server_addr));
+
+server_addr.sin_family = AF_INET;
+server_addr.sin_addr.s_addr = INADDR_ANY;
+server_addr.sin_port = htons(server->port);
+```
+
+Aqui permitimos o reuso do socket caso necessite reiniciar o serviço
+```c
+if (setsockopt(server->socket, SOL_SOCKET, SO_REUSEADDR, (void*)&yes, sizeof(yes)) < 0)
+    break;
+```
+Aplicamos as configurações ao socket criado e atribuimos true na variável status
+```c
+if (bind(server->socket, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
+    break;
+status = true;
+```
+
+Na função UDP_Server_Run declaramos algumas variáveis para receber as mensagens enviadas pelo cliente
+
+```c
+bool status = false;
+struct sockaddr_in client_addr;
+socklen_t len = sizeof(client_addr);
+size_t read_size;
+```
+Verificamos se o socket é válido e aguardamos uma mensagem do cliente, repassamos a mensagem para o callback realizar o tratamento de acordo com a aplicação do cliente, e retornamos o estado.
+```c
+if(server->socket > 0)
 {
-    bool status = false;
-    struct sockaddr_in server_addr;
-
-    do
-    {
-        if(!server || !server->buffer || !server->buffer_size)
-            break;
-
-        server->socket = socket(AF_INET, SOCK_DGRAM, 0);
-        if(server->socket < 0)
-            break;
-
-        memset(&server_addr, 0, sizeof(server_addr));
-
-        server_addr.sin_family = AF_INET;
-        server_addr.sin_addr.s_addr = INADDR_ANY;
-        server_addr.sin_port = htons(server->port);
-
-        int yes = 1;
-        if (setsockopt(server->socket, SOL_SOCKET, SO_REUSEADDR, (void*)&yes, sizeof(yes)) < 0)
-            break;
-
-        if (bind(server->socket, (const struct sockaddr *)&server_addr, sizeof(server_addr)) < 0)
-            break;
-
-        status = true;
-        
-    } while(false);
-
-    return status;
+    read_size = recvfrom(server->socket, server->buffer, server->buffer_size, MSG_WAITALL,
+                                (struct sockaddr *)&client_addr, &len); 
+    server->buffer[read_size] = 0;
+    server->on_receive_message(server->buffer, read_size, user_data);
+    memset(server->buffer, 0, server->buffer_size);
+    status = true;
 }
 
-bool UDP_Server_Run(UDP_Server *server, void *user_data)
-{
-    bool status = false;
-    struct sockaddr_in client_addr;
-    socklen_t len = sizeof(client_addr);
-    size_t read_size;
-
-    if(server->socket > 0)
-    {
-        read_size = recvfrom(server->socket, server->buffer, server->buffer_size, MSG_WAITALL,
-                                    (struct sockaddr *)&client_addr, &len); 
-        server->buffer[read_size] = 0;
-        server->on_receive_message(server->buffer, read_size, user_data);
-        memset(server->buffer, 0, server->buffer_size);
-        status = true;
-    }
-
-    return status;
-}
-
+return status;
+```
 
 ### udp_client.h
+Criamos também um contexto que armazena os paramêtros utilizados pelo cliente, sendo o socket para armazenar a instância criada, hostname é o ip que da máquina que vai enviar as mensagens e o port que recebe o número que corresponde qual o serviço deseja consumir
 
 ```c
 typedef struct 
@@ -195,51 +208,58 @@ typedef struct
 } UDP_Client;
 ```
 
+Inicializa o cliente com os parâmetros do descritor 
 ```c
 bool UDP_Client_Init(UDP_Client *client);
 ```
 
+Envia mensagem para o servidor baseado nos parâmetros do descritor.
 ```c
 bool UDP_Client_Send(UDP_Client *client, const char *message, size_t message_size);
 ```
 ### udp_client.c
 
-bool UDP_Client_Init(UDP_Client *client)
+Na função UDP_Client_Init verificamos se o contexto foi iniciado, e configuramos o socket como UDP
+
+```c
+bool status = false;
+do 
 {
-    bool status = false;
-    do 
-    {
-        if(!client)
-            break;
+    if(!client)
+        break;
 
-        client->socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
-        if(client->socket < 0)
-            break;
+    client->socket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
+    if(client->socket < 0)
+        break;
 
-        status = true;        
-    }while(false);
-    
-    return status;
-}
+    status = true;        
+}while(false);
 
-bool UDP_Client_Send(UDP_Client *client, const char *message, size_t message_size)
-{
-    bool status = false;
-    struct sockaddr_in server;
-    ssize_t send_len;
+return status;
+```
 
-    memset(&server, 0, sizeof(server));
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = inet_addr(client->hostname);
-    server.sin_port = htons(atoi(client->port));
+Na função UDP_Client_Send definimos algumas váriaveis para auxiliar na comunicação com o servidor, sendo uma variável booleana que representa o estado de envio para o servidor, uma estrutura sockaddr_in que é usada para configurar o servidor no qual será enviado as mensagens e uma variável de quantidade de dados enviados.
 
-    send_len = sendto(client->socket, message, message_size, 0, (struct sockaddr *)&server, sizeof(server));
-    if(send_len == message_size)
-        status = true;
+```c
+bool status = false;
+struct sockaddr_in server;
+ssize_t send_len;
+```
+Parâmetrizamos a estrutura com os dados do servidor
+```c
+memset(&server, 0, sizeof(server));
+server.sin_family = AF_INET;
+server.sin_addr.s_addr = inet_addr(client->hostname);
+server.sin_port = htons(atoi(client->port));
+```
+Realizamos o envio da mensagem para o servidor
+```c
+send_len = sendto(client->socket, message, message_size, 0, (struct sockaddr *)&server, sizeof(server));
+  if(send_len == message_size)
+      status = true;
 
-    return status;
-}
-
+return status;
+```
 Aplicação é composta por três executáveis sendo eles:
 * _launch_processes_ - é responsável por lançar os processos _button_process_ e _led_process_ atráves da combinação _fork_ e _exec_
 * _button_interface_ - é responsável por ler o GPIO em modo de leitura da Raspberry Pi e escrever o estado interno no arquivo
@@ -283,7 +303,7 @@ if(pid_led == 0)
 ```
 
 ## *button_interface*
-
+Definimos uma lista de comandos que iremos enviar
 ```c
 const char *led_commands[] = 
 {
@@ -291,7 +311,7 @@ const char *led_commands[] =
     "LED OFF"
 };
 ```
-
+A implementação do Button_Run ficou simples, onde realizamos a inicialização do interface de botão e ficamos em loop aguardando o pressionamento do botão para alterar o estado da variável e enviar a mensagem para o servidor
 ```c
 bool Button_Run(UDP_Client *client, Button_Data *button)
 {
@@ -314,6 +334,7 @@ bool Button_Run(UDP_Client *client, Button_Data *button)
 }
 ```
 ## *led_interface*
+A implementação do LED_Run ficou simplificada, realizamos a inicialização da interface de LED, do servidor e ficamos em loop aguardando o recebimento de uma mensagem.
 ```c
 bool LED_Run(UDP_Server *server, LED_Data *led)
 {
@@ -335,6 +356,8 @@ bool LED_Run(UDP_Server *server, LED_Data *led)
 ```
 
 ## *button_process*
+A parametrização do cliente fica por conta do processo de botão que inicializa o contexto o endereço do hostname, o serviço que deseja consumir, e assim passamos os argumentos para Button_Run iniciar o processo.
+
 ```c
 UDP_Client client = 
 {
@@ -345,7 +368,7 @@ UDP_Client client =
 Button_Run(&client, &button);
 ```
 ## *led_process*
-
+A parametrização do servidor fica por conta do processo de LED que inicializa o contexto com o buffer, seu tamanho, a porta onde vai servir e o callback preenchido, e assim passamos os argumentos para LED_Run iniciar o serviço.
 ```c
 UDP_Server server = 
 {
@@ -355,15 +378,10 @@ UDP_Server server =
     .on_receive_message = on_receive_message
 };
 
-LED_Data led = 
-{
-    .object = NULL,
-    .interface = &led_interface
-};
-
 LED_Run(&server, &led);
 ```
 
+A implementação no evento de recebimento da mensagem, compara a mensagem recebida com os comandos internos para o acionamento do LED, caso for igual executa a ação correspondente.
 ```c
 void on_receive_message(const char *buffer, size_t buffer_size, void *data)
 {
@@ -535,7 +553,7 @@ $ ./kill_process.sh
 ```
 
 ## Conclusão
-Preencher
+O UDP é um protocolo utilizado quando se necessita enviar grandes volumes de dados, devido a sua simplicidade garante um maior desempenho em velocidade no envio de mensagens, o fato de não reportar as mensagens que recebeu, isso reduz a quantidade de processamento para tratar o protocolo, esse protocolo é usado também em aplicações de controle, estado e configuração da rede como o DNS(Domain Name System), o DHCP (Dynamic Host Configuration) e o RIP(Routing Information Protocol), nos próximo artigo iremos abordar o seu uso como Broadcast.
 
 ## Referência
 * [Link do projeto completo](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_UDP)
