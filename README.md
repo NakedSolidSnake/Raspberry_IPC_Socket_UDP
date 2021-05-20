@@ -39,7 +39,7 @@
 * [Referência](#referência)
 
 ## Introdução
-UDP significa _User Datagram Protocol_, é um protocolo que não precisa se conectar na máquina para qual se quer enviar a mensagem, ou seja, não há a necessidade do _handshake_ presente no [TCP](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_TCP) necessário para a sua conexão, diante disso essa caracteristica o torna muito mais rápido, sendo utilizados em aplicações que involvem jogos online, streaming de video e video conferência. Diferente do TCP, o UDP não garante entrega de dados, a máquina que recebe a mensagem não informa que a mensagem foi recebida, dessa forma trazendo consigo a idéia de ser um protocolo não confiável, o que acaba se tornando verdade quando as máquinas precisam usar a internet para se comunicarem(grandes distâncias) podendo entregar os pacotes fora de ordem, mas quando dentro de uma rede local acaba sendo uma opção melhor de utilização.
+UDP significa _User Datagram Protocol_, é um protocolo que não precisa se conectar na máquina para qual se quer enviar a mensagem, ou seja, não há a necessidade do _handshake_ presente no [TCP](https://github.com/NakedSolidSnake/Raspberry_IPC_Socket_TCP) necessário para a sua conexão, diante disso essa caracteristica o torna muito mais rápido, sendo utilizados em aplicações que envolvem jogos online, streaming de video e video conferência. Diferente do TCP, o UDP não garante entrega de dados, a máquina que recebe a mensagem não informa que a mensagem foi recebida, dessa forma trazendo consigo a fama de ser um protocolo não confiável, o que acaba se tornando verdade quando as máquinas precisam usar a internet para se comunicarem(grandes distâncias) podendo entregar os pacotes fora de ordem, mas quando dentro de uma rede local acaba sendo uma opção melhor de utilização.
 
 ## Datagrama UDP
 O Protocolo UDP é um protocolo simples, devido a sua simplicidade garante uma melhor performance no processamento do protocolo. O UDP opera sobre o protocolo IP. A imagem a seguir demonstra como o protocolo UDP é encapsulado no protocolo IPv4
@@ -104,7 +104,7 @@ sudo apt-get install tcpdump
 ```
 
 ## netcat 
-O netcat é uma ferramenta capaz de interagir com conexões UDP e TCP, podendo abrir conexões, ouvindo como um servidor, ou com cliente enviando mensanges para um servidor.
+O netcat é uma ferramenta capaz de interagir com conexões UDP e TCP, podendo abrir conexões, ouvindo como um servidor, ou com cliente enviando mensagens para um servidor.
 
 ## tcpdump
 O tcpdump é uma ferramenta capaz de monitorar o tráfego de dados em uma dada interface como por exemplo eth0, com ele é possível analisar os pacotes que são recebido e enviados.
@@ -122,7 +122,7 @@ Primeiramente criamos um callback responsável por eventos de recebimento, essa 
 typedef void (*Event)(const char *buffer, size_t buffer_size, void *data);
 ```
 
-Criamos também um contexto que armazena os parâmetros utilizados pelo servidor, sendo o socket para armazenar a instância criada, port que recebe o número que corresponde onde o serviço será disponibilizado, buffer que aponta para a memória alocada previamente pelo usuário, buffer_size o representa o tamanho do buffer e o callback para para recepção da mensagem
+Criamos também um contexto que armazena os parâmetros utilizados pelo servidor, sendo o socket para armazenar a instância criada, port que recebe o número que corresponde onde o serviço será disponibilizado, buffer que aponta para a memória alocada previamente pelo usuário, buffer_size o representa o tamanho do buffer e o callback para recepção da mensagem
 
 ```c
 typedef struct 
@@ -154,7 +154,7 @@ struct sockaddr_in server_addr;
 int yes = 1;
 ```
 
-Para realizar a inicialização é criado um dummy do while, para que quando houver falha em qualquer uma das etapas, irá sair da função com status de erro, nesse ponto verificamos se o contexto, o buffer e se o tamanho do buffer foi inicializado, sendo sua inicialização de reponsabilidade do usuário
+Para realizar a inicialização é criado um dummy do while, para que quando houver falha em qualquer uma das etapas, irá sair da função com status de erro, nesse ponto verificamos se o contexto, o buffer e se o tamanho do buffer foi inicializado, sendo sua inicialização de responsabilidade do usuário
 
 ```c
 if(!server || !server->buffer || !server->buffer_size)
@@ -211,7 +211,7 @@ return status;
 ```
 
 ### udp_client.h
-Criamos também um contexto que armazena os paramêtros utilizados pelo cliente, sendo o socket para armazenar a instância criada, hostname é o ip que da máquina que vai enviar as mensagens e o port que recebe o número que corresponde qual o serviço deseja consumir
+Criamos também um contexto que armazena os parâmetros utilizados pelo cliente, sendo o socket para armazenar a instância criada, hostname é o ip que da máquina que vai enviar as mensagens e o port que recebe o número que corresponde qual o serviço deseja consumir
 
 ```c
 typedef struct 
@@ -275,7 +275,7 @@ send_len = sendto(client->socket, message, message_size, 0, (struct sockaddr *)&
 return status;
 ```
 Aplicação é composta por três executáveis sendo eles:
-* _launch_processes_ - é responsável por lançar os processos _button_process_ e _led_process_ atráves da combinação _fork_ e _exec_
+* _launch_processes_ - é responsável por lançar os processos _button_process_ e _led_process_ através da combinação _fork_ e _exec_
 * _button_interface_ - é responsável por ler o GPIO em modo de leitura da Raspberry Pi e escrever o estado interno no arquivo
 * _led_interface_ - é responsável por ler do arquivo o estado interno do botão e aplicar em um GPIO configurado como saída
 
@@ -412,7 +412,7 @@ void on_receive_message(const char *buffer, size_t buffer_size, void *data)
 Para compilar e testar o projeto é necessário instalar a biblioteca de [hardware](https://github.com/NakedSolidSnake/Raspberry_lib_hardware) necessária para resolver as dependências de configuração de GPIO da Raspberry Pi.
 
 ## Compilando
-Para faciliar a execução do exemplo, o exemplo proposto foi criado baseado em uma interface, onde é possível selecionar se usará o hardware da Raspberry Pi 3, ou se a interação com o exemplo vai ser através de input feito por FIFO e o output visualizado através de LOG.
+Para facilitar a execução do exemplo, o exemplo proposto foi criado baseado em uma interface, onde é possível selecionar se usará o hardware da Raspberry Pi 3, ou se a interação com o exemplo vai ser através de input feito por FIFO e o output visualizado através de LOG.
 
 ### Clonando o projeto
 Pra obter uma cópia do projeto execute os comandos a seguir:
